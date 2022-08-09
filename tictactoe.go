@@ -48,7 +48,7 @@ func (t TicTacToePlugin) Handlers() map[string]any {
 				}
 				newGame.gameID = fmt.Sprintf("%sand%s", newGame.challengerID, newGame.challengeeID)
 
-				recipientMessage := fmt.Sprintf("You have been challenged to a Tic-Tac-Toe game by by <@%s>!", newGame.challengerID)
+				recipientMessage := fmt.Sprintf("You have been challenged to a Tic-Tac-Toe game by <@%s>!", newGame.challengerID)
 				recipientUserChannel, err := session.UserChannelCreate(newGame.challengeeID)
 				if err != nil {
 					return
@@ -106,10 +106,14 @@ func (t TicTacToePlugin) Handlers() map[string]any {
 
 			} else if strings.HasPrefix(i.MessageComponentData().CustomID, "ttt_challenge_accept_") {
 				gameID := strings.TrimPrefix(i.MessageComponentData().CustomID, "ttt_challenge_accept_")
-				t.activeGames[gameID].accepted = true
-				log.Debug().Msg(t.activeGames[gameID].gameID)
 
-				utils.InteractionResponse(session, i.Interaction).Message("Accepted challenge!")
+				if _, ok := t.activeGames[gameID]; !ok {
+					utils.InteractionResponse(session, i.Interaction).Flags(discordgo.MessageFlagsEphemeral).Message("Challenge doesn't exist.").SendWithLog(log.Logger)
+					return
+				} else {
+					t.activeGames[gameID].accepted = true
+					utils.InteractionResponse(session, i.Interaction).Flags(discordgo.MessageFlagsEphemeral).Message("Accepted challenge").SendWithLog(log.Logger)
+				}
 			}
 
 		}
