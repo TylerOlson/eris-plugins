@@ -14,6 +14,8 @@ github.com/olympus-go/eris v0.0.0-20220807175417-7febd9c5d27d h1:HZ8zEbXQ2RR9CBo
 github.com/olympus-go/eris v0.0.0-20220807175417-7febd9c5d27d/go.mod h1:NZuxZfZPKWkxKqc5QaOeQczVHn6/TBUuW2xXG1vzj5Q=
 github.com/olympus-go/eris v0.0.0-20220808063455-79abb554cfcb h1:yYqoQaeIlNjPG2yX5wY3bg5T92r9JqMQwAi8aBTGhPQ=
 github.com/olympus-go/eris v0.0.0-20220808063455-79abb554cfcb/go.mod h1:ZvYuqAMTxCgVHsFJ8yKEWASxme/gH6xKAiKi4yiHkF8=
+github.com/olympus-go/eris v0.0.0-20220810063538-e6f8d1f2c881 h1:wdUSIoMMCE2mo8ngLDgiJGW0+/EvEwRrliLBSLpmQGw=
+github.com/olympus-go/eris v0.0.0-20220810063538-e6f8d1f2c881/go.mod h1:ZvYuqAMTxCgVHsFJ8yKEWASxme/gH6xKAiKi4yiHkF8=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/rs/xid v1.3.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/rs/zerolog v1.27.0 h1:1T7qCieN22GVc8S4Q2yuexzBb1EqjbgjSH9RohbMjKs=

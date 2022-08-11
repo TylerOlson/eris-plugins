@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/bwmarrin/discordgo v0.25.0
-	github.com/olympus-go/eris v0.0.0-20220808063455-79abb554cfcb
+	github.com/olympus-go/eris v0.0.0-20220810063538-e6f8d1f2c881
 	github.com/rs/zerolog v1.27.0
 )
 
