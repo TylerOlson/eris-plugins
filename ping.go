@@ -19,7 +19,7 @@ func (p PingPlugin) Name() string {
 }
 
 func (p PingPlugin) Description() string {
-	return "Ping"
+	return "Is it working yet?"
 }
 
 func (p PingPlugin) Handlers() map[string]any {
