@@ -39,12 +39,17 @@ func (t *TicTacToePlugin) Handlers() map[string]any {
 			if i.ApplicationCommandData().Name == "tictactoe" {
 				// make sure command originates from guild
 				if i.Interaction.GuildID == "" {
-					utils.InteractionResponse(session, i.Interaction).Message("Please use in a channel, not a DM!").SendWithLog(t.logger)
+					utils.InteractionResponse(session, i.Interaction).Message("Please use in a channel, not a DM!").Ephemeral().SendWithLog(t.logger)
 					t.logger.Debug().Str("user_id", i.Interaction.User.ID).Msg(" Received dm from user")
 					return
 				}
 
 				ID := i.Interaction.ChannelID
+
+				if _, ok := t.activeGames[ID]; ok { // don't make another game
+					utils.InteractionResponse(session, i.Interaction).Message("Game already running!").Ephemeral().SendWithLog(t.logger)
+					return
+				}
 
 				// create a game and display it
 				t.createTicTacToeGame(ID)
@@ -60,7 +65,7 @@ func (t *TicTacToePlugin) Handlers() map[string]any {
 				gameID := splitID[5]
 
 				if _, ok := t.activeGames[gameID]; !ok { // make sure game is active, no seg faults for me
-					utils.InteractionResponse(session, i.Interaction).Message("Game does not exist!").Flags(discordgo.MessageFlagsEphemeral).SendWithLog(t.logger)
+					utils.InteractionResponse(session, i.Interaction).Message("Game is over!").Ephemeral().SendWithLog(t.logger)
 					return
 				}
 
@@ -76,9 +81,15 @@ func (t *TicTacToePlugin) Handlers() map[string]any {
 				}
 
 				//update data and edit the existing board message, respond with ok response
-				t.updateTicTacToeData(gameID, row, column)
-				t.updateTicTacToeBoard(gameID)
-				utils.InteractionResponse(session, i.Interaction).Type(discordgo.InteractionResponseDeferredMessageUpdate).SendWithLog(t.logger)
+				t.updateTicTacToeGame(gameID, row, column)
+
+				if t.isWinner(gameID) != "" {
+					utils.InteractionResponse(session, i.Interaction).Message(t.isWinner(gameID) + " wins!").SendWithLog(t.logger)
+					delete(t.activeGames, gameID)
+				} else {
+					utils.InteractionResponse(session, i.Interaction).Type(discordgo.InteractionResponseDeferredMessageUpdate).SendWithLog(t.logger)
+				}
+
 				t.logger.Debug().Interface("game", t.activeGames[gameID]).Msg("updated game")
 			}
 		}
@@ -120,17 +131,31 @@ func (t *TicTacToePlugin) createTicTacToeGame(guildID string) {
 	}
 }
 
-func (t *TicTacToePlugin) updateTicTacToeData(id string, row int, column int) {
+func (t *TicTacToePlugin) updateTicTacToeGame(id string, row int, column int) {
 	t.activeGames[id].Data[row][column] = t.activeGames[id].Turn
 
 	if t.activeGames[id].Turn == "X" {
+		t.activeGames[id].xScores[row] += 1
+		t.activeGames[id].xScores[column+3] += 1
+		if row == column {
+			t.activeGames[id].xScores[6] += 1
+		}
+		if 3-1-column == row {
+			t.activeGames[id].xScores[7] += 1
+		}
 		t.activeGames[id].Turn = "O"
 	} else if t.activeGames[id].Turn == "O" {
 		t.activeGames[id].Turn = "X"
+		t.activeGames[id].oScores[row] += 1
+		t.activeGames[id].oScores[column+3] += 1
+		if row == column {
+			t.activeGames[id].oScores[6] += 1
+		}
+		if 3-1-column == row {
+			t.activeGames[id].oScores[7] += 1
+		}
 	}
-}
 
-func (t *TicTacToePlugin) updateTicTacToeBoard(id string) {
 	components := t.getTicTacToeComponents(id)
 
 	t.activeGames[id].message = t.activeGames[id].message.Components(components[0], components[1], components[2])
@@ -168,9 +193,25 @@ func (t *TicTacToePlugin) displayTicTacToeGame(session *discordgo.Session, i *di
 	t.activeGames[ID].message = message
 }
 
+func (t *TicTacToePlugin) isWinner(ID string) string {
+	game := t.activeGames[ID]
+
+	for i := 0; i < 8; i++ {
+		if game.xScores[i] == 3 {
+			return "X"
+		} else if game.oScores[i] == 3 {
+			return "O"
+		}
+	}
+
+	return ""
+}
+
 type ticTacToeGame struct {
 	ID      string
 	Data    [3][3]string
 	Turn    string
 	message *utils.InteractionResponseBuilder
+	xScores [8]int //[row1, row2, row3, col1, col2, col3, diag1, diag2]
+	oScores [8]int // grid * 2 + 2
 }
